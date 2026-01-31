@@ -215,13 +215,7 @@ a:hover{ text-decoration:underline; }
   flex: 0 0 auto;
 }
 
-/* 关键：把社交区推到最右 */
-.site-social{
-  margin-left: auto;           /* 核心 */
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
+
 
 /* 图标点击区域 */
 .site-social .social-link{
