@@ -19,6 +19,9 @@
 
   function parseCfg() {
     var raw = `{{ .Inner | safeHTML }}`.trim();
+// 兼容 Markdown 代码块 ```json ... ```
+raw = raw.replace(/^```[a-zA-Z]*\s*/,'').replace(/```$/,'').trim();
+
     if (!raw) return null;
 
     // 1) 优先严格 JSON

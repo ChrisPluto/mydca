@@ -199,39 +199,3 @@ a:hover{ text-decoration:underline; }
 
   .article h1{ font-size: 24px; }
 }
-<<<<<<< HEAD
-
-/* =========================
-   Header 右侧社交图标（必须加）
-   ========================= */
-
-/* 让 header 内部左右分布：左 brand + 右 social */
-.site-header{
-  display: flex;
-  align-items: center;
-}
-
-/* brand 不要占满整行（避免把右侧挤走） */ 
-.site-brand{
-  flex: 0 0 auto;
-}
-
-
-
-/* 图标点击区域 */
-.site-social .social-link{
-  display: inline-flex;
-  align-items: center;
-  padding: 2px;
-}
-
-/* 图标尺寸 */
-.site-social .social-icon{
-  width: 34px;
-  height: 34px;
-  display: block;
-}
-
-
-=======
->>>>>>> 3840e7b (daily update 2026/01/31 周六 16:04:38.38)
