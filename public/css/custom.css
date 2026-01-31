@@ -210,7 +210,7 @@ a:hover{ text-decoration:underline; }
   align-items: center;
 }
 
-/* brand 不要占满整行（避免把右侧挤走） */
+/* brand 不要占满整行（避免把右侧挤走） */ 
 .site-brand{
   flex: 0 0 auto;
 }
