@@ -199,3 +199,18 @@ a:hover{ text-decoration:underline; }
 
   .article h1{ font-size: 24px; }
 }
+
+/* 顶部右侧社交图标整体微调 */
+.site-social {
+  display: flex;
+  align-items: center;   /* 垂直居中 */
+  gap: 12px;             /* 两个图标之间的间距 */
+  margin-left: 16px;     /* 整体往右挪一点点（你可以调） */
+}
+
+/* 统一图标尺寸，避免视觉不齐 */
+.site-social .social-icon {
+  width: 28px;
+  height: 28px;
+  display: block;
+}
