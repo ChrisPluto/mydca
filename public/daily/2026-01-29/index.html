@@ -213,14 +213,20 @@
 </ul>
 <h2 id="-我的持仓占比">🎨 我的持仓占比</h2>
 <div style="max-width: 980px; margin: 16px 0;">
-  
   <canvas id="chart-daily%5C2026-01-29.md-0" width="980" height="420" style="width:100%; height:420px;"></canvas>
+
+  
+  <div id="chart-daily%5C2026-01-29.md-0-cfg" style="display:none;">
+    {"type":"doughnut","data":{"labels":["btc","eth","sol"],"datasets":[{"data":[2500,500,2700],"backgroundColor":["#FC5868","#8CC406","#3E03D1"]}]},"options":{"plugins":{"title":{"display":true,"text":"小李飞刀的持仓环形分布图(单位：usdt)"},"legend":{"display":true,"position":"right"}},"maintainAspectRatio":false}}
+  </div>
+
   <div id="chart-daily%5C2026-01-29.md-0-err" style="margin-top:8px; color:#b00020; font-size:14px; white-space:pre-wrap;"></div>
 </div>
 
 <script>
 (function () {
   var canvasId = "chart-daily%5C2026-01-29.md-0";
+  var cfgId = "chart-daily%5C2026-01-29.md-0-cfg";
   var errId = "chart-daily%5C2026-01-29.md-0-err";
 
   function showErr(msg) {
@@ -228,25 +234,31 @@
     if (el) el.textContent = msg;
   }
 
+  function getRawCfgText() {
+    var el = document.getElementById(cfgId);
+    if (!el) return "";
+    
+    return (el.textContent || "").trim();
+  }
+
   function parseCfg() {
-    var raw = `\r\n\u0060\u0060\u0060json\r\n\u007b\r\n  \u0022type\u0022: \u0022doughnut\u0022,\r\n  \u0022data\u0022: \u007b\r\n    \u0022labels\u0022: [\u0022btc\u0022, \u0022eth\u0022, \u0022sol\u0022],\r\n    \u0022datasets\u0022: [\r\n      \u007b\r\n        \u0022data\u0022: [2500, 500, 2700],\r\n        \u0022backgroundColor\u0022: [\u0022#FC5868\u0022, \u0022#8CC406\u0022, \u0022#3E03D1\u0022]\r\n      \u007d\r\n    ]\r\n  \u007d,\r\n  \u0022options\u0022: \u007b\r\n    \u0022plugins\u0022: \u007b\r\n      \u0022title\u0022: \u007b\r\n        \u0022display\u0022: true,\r\n        \u0022text\u0022: \u0022小李飞刀的持仓环形分布图(单位：usdt)\u0022\r\n      \u007d,\r\n      \u0022legend\u0022: \u007b\r\n        \u0022display\u0022: true,\r\n        \u0022position\u0022: \u0022right\u0022\r\n      \u007d\r\n    \u007d,\r\n    \u0022maintainAspectRatio\u0022: false\r\n  \u007d\r\n\u007d\r\n`.trim();
+    var raw = getRawCfgText();
+    if (!raw) return null;
 
-raw = raw.replace(/^```[a-zA-Z]*\s*/,'').replace(/```$/,'').trim();
-
+    
+    raw = raw.replace(/^\s*```[a-zA-Z]*\s*/,'').replace(/```\s*$/,'').trim();
     if (!raw) return null;
 
     
     try { return JSON.parse(raw); } catch (e) {}
 
     
-    
     try { return (new Function("return (" + raw + ");"))(); } catch (e) {}
 
     return null;
   }
 
-  
-  function readyThenRender() {
+  function renderWhenReady() {
     var start = Date.now();
 
     (function tick() {
@@ -270,12 +282,11 @@ raw = raw.replace(/^```[a-zA-Z]*\s*/,'').replace(/```$/,'').trim();
         return;
       }
 
-      
       requestAnimationFrame(function () {
         var cfg = parseCfg();
         if (!cfg || typeof cfg !== "object") {
-          showErr("Chart 配置不是对象（请检查 chart shortcode 内 JSON/对象是否完整）");
-          console.error("Chart raw config:", `\r\n\u0060\u0060\u0060json\r\n\u007b\r\n  \u0022type\u0022: \u0022doughnut\u0022,\r\n  \u0022data\u0022: \u007b\r\n    \u0022labels\u0022: [\u0022btc\u0022, \u0022eth\u0022, \u0022sol\u0022],\r\n    \u0022datasets\u0022: [\r\n      \u007b\r\n        \u0022data\u0022: [2500, 500, 2700],\r\n        \u0022backgroundColor\u0022: [\u0022#FC5868\u0022, \u0022#8CC406\u0022, \u0022#3E03D1\u0022]\r\n      \u007d\r\n    ]\r\n  \u007d,\r\n  \u0022options\u0022: \u007b\r\n    \u0022plugins\u0022: \u007b\r\n      \u0022title\u0022: \u007b\r\n        \u0022display\u0022: true,\r\n        \u0022text\u0022: \u0022小李飞刀的持仓环形分布图(单位：usdt)\u0022\r\n      \u007d,\r\n      \u0022legend\u0022: \u007b\r\n        \u0022display\u0022: true,\r\n        \u0022position\u0022: \u0022right\u0022\r\n      \u007d\r\n    \u007d,\r\n    \u0022maintainAspectRatio\u0022: false\r\n  \u007d\r\n\u007d\r\n`);
+          showErr("Chart 配置不是对象（请检查 chart shortcode 内 JSON 是否完整）");
+          console.error("Chart raw config text:", getRawCfgText());
           return;
         }
 
@@ -291,32 +302,34 @@ raw = raw.replace(/^```[a-zA-Z]*\s*/,'').replace(/```$/,'').trim();
           console.error(e);
         }
       });
+
     })();
   }
 
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", readyThenRender);
+    document.addEventListener("DOMContentLoaded", renderWhenReady);
   } else {
-    readyThenRender();
+    renderWhenReady();
   }
 })();
 </script>
 
-<pre tabindex="0"><code>
----
-
-## 🍺 我的定投收益分布（改成这样）
-```markdown
-## 🍺 我的定投收益分布
+<h2 id="-我的定投收益分布">🍺 我的定投收益分布</h2>
 <div style="max-width: 980px; margin: 16px 0;">
-  
   <canvas id="chart-daily%5C2026-01-29.md-1" width="980" height="420" style="width:100%; height:420px;"></canvas>
+
+  
+  <div id="chart-daily%5C2026-01-29.md-1-cfg" style="display:none;">
+    {"type":"bar","data":{"labels":["btc","eth","sol"],"datasets":[{"data":[29.94019379,49.99934642,-261.89527344],"backgroundColor":["#FC5868","#8CC406","#3E03D1"]}]},"options":{"plugins":{"title":{"display":true,"text":"小李飞刀的持仓收益柱状图(单位：usdt)"},"legend":{"display":false,"position":"right"}},"maintainAspectRatio":false}}
+  </div>
+
   <div id="chart-daily%5C2026-01-29.md-1-err" style="margin-top:8px; color:#b00020; font-size:14px; white-space:pre-wrap;"></div>
 </div>
 
 <script>
 (function () {
   var canvasId = "chart-daily%5C2026-01-29.md-1";
+  var cfgId = "chart-daily%5C2026-01-29.md-1-cfg";
   var errId = "chart-daily%5C2026-01-29.md-1-err";
 
   function showErr(msg) {
@@ -324,25 +337,31 @@ raw = raw.replace(/^```[a-zA-Z]*\s*/,'').replace(/```$/,'').trim();
     if (el) el.textContent = msg;
   }
 
+  function getRawCfgText() {
+    var el = document.getElementById(cfgId);
+    if (!el) return "";
+    
+    return (el.textContent || "").trim();
+  }
+
   function parseCfg() {
-    var raw = `\r\n\u0060\u0060\u0060json\r\n\u007b\r\n  \u0022type\u0022: \u0022bar\u0022,\r\n  \u0022data\u0022: \u007b\r\n    \u0022labels\u0022: [\u0022btc\u0022, \u0022eth\u0022, \u0022sol\u0022],\r\n    \u0022datasets\u0022: [\r\n      \u007b\r\n        \u0022data\u0022: [29.94019379, 49.99934642, -261.89527344],\r\n        \u0022backgroundColor\u0022: [\u0022#FC5868\u0022, \u0022#8CC406\u0022, \u0022#3E03D1\u0022]\r\n      \u007d\r\n    ]\r\n  \u007d,\r\n  \u0022options\u0022: \u007b\r\n    \u0022plugins\u0022: \u007b\r\n      \u0022title\u0022: \u007b\r\n        \u0022display\u0022: true,\r\n        \u0022text\u0022: \u0022小李飞刀的持仓收益柱状图(单位：usdt)\u0022\r\n      \u007d,\r\n      \u0022legend\u0022: \u007b\r\n        \u0022display\u0022: false,\r\n        \u0022position\u0022: \u0022right\u0022\r\n      \u007d\r\n    \u007d,\r\n    \u0022maintainAspectRatio\u0022: false\r\n  \u007d\r\n\u007d\r\n`.trim();
+    var raw = getRawCfgText();
+    if (!raw) return null;
 
-raw = raw.replace(/^```[a-zA-Z]*\s*/,'').replace(/```$/,'').trim();
-
+    
+    raw = raw.replace(/^\s*```[a-zA-Z]*\s*/,'').replace(/```\s*$/,'').trim();
     if (!raw) return null;
 
     
     try { return JSON.parse(raw); } catch (e) {}
 
     
-    
     try { return (new Function("return (" + raw + ");"))(); } catch (e) {}
 
     return null;
   }
 
-  
-  function readyThenRender() {
+  function renderWhenReady() {
     var start = Date.now();
 
     (function tick() {
@@ -366,12 +385,11 @@ raw = raw.replace(/^```[a-zA-Z]*\s*/,'').replace(/```$/,'').trim();
         return;
       }
 
-      
       requestAnimationFrame(function () {
         var cfg = parseCfg();
         if (!cfg || typeof cfg !== "object") {
-          showErr("Chart 配置不是对象（请检查 chart shortcode 内 JSON/对象是否完整）");
-          console.error("Chart raw config:", `\r\n\u0060\u0060\u0060json\r\n\u007b\r\n  \u0022type\u0022: \u0022bar\u0022,\r\n  \u0022data\u0022: \u007b\r\n    \u0022labels\u0022: [\u0022btc\u0022, \u0022eth\u0022, \u0022sol\u0022],\r\n    \u0022datasets\u0022: [\r\n      \u007b\r\n        \u0022data\u0022: [29.94019379, 49.99934642, -261.89527344],\r\n        \u0022backgroundColor\u0022: [\u0022#FC5868\u0022, \u0022#8CC406\u0022, \u0022#3E03D1\u0022]\r\n      \u007d\r\n    ]\r\n  \u007d,\r\n  \u0022options\u0022: \u007b\r\n    \u0022plugins\u0022: \u007b\r\n      \u0022title\u0022: \u007b\r\n        \u0022display\u0022: true,\r\n        \u0022text\u0022: \u0022小李飞刀的持仓收益柱状图(单位：usdt)\u0022\r\n      \u007d,\r\n      \u0022legend\u0022: \u007b\r\n        \u0022display\u0022: false,\r\n        \u0022position\u0022: \u0022right\u0022\r\n      \u007d\r\n    \u007d,\r\n    \u0022maintainAspectRatio\u0022: false\r\n  \u007d\r\n\u007d\r\n`);
+          showErr("Chart 配置不是对象（请检查 chart shortcode 内 JSON 是否完整）");
+          console.error("Chart raw config text:", getRawCfgText());
           return;
         }
 
@@ -387,18 +405,19 @@ raw = raw.replace(/^```[a-zA-Z]*\s*/,'').replace(/```$/,'').trim();
           console.error(e);
         }
       });
+
     })();
   }
 
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", readyThenRender);
+    document.addEventListener("DOMContentLoaded", renderWhenReady);
   } else {
-    readyThenRender();
+    renderWhenReady();
   }
 })();
 </script>
 
-</code></pre><h2 id="-我的定投策略">📋 我的定投策略</h2>
+<h2 id="-我的定投策略">📋 我的定投策略</h2>
 <blockquote>
 <p>定投 = 固定时间 + 固定金额 + 长期执行。不猜高点、不抄底、不预测行情。我于2021年 BTC 69000U 牛市最高点跟随Anbang对市值前100的币进行定投，定投持续了三年，于2024年取得了相当可观的盈利。所以我开始了新一轮的只买不卖三十年定投计划。</p>
 </blockquote>

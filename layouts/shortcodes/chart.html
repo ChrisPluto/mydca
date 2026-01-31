@@ -2,14 +2,20 @@
 {{- $h := .Get "height" | default "420" -}}
 
 <div style="max-width: 980px; margin: 16px 0;">
-  <!-- 关键：给 canvas 写死 height/width 属性，避免某些环境下计算为 0 导致“空白” -->
   <canvas id="{{ $id }}" width="980" height="{{ $h }}" style="width:100%; height:{{ $h }}px;"></canvas>
+
+  <!-- 关键：把配置放进隐藏 DOM，让浏览器帮我们“剥掉 HTML”，拿到纯文本 -->
+  <div id="{{ $id }}-cfg" style="display:none;">
+    {{ .Inner }}
+  </div>
+
   <div id="{{ $id }}-err" style="margin-top:8px; color:#b00020; font-size:14px; white-space:pre-wrap;"></div>
 </div>
 
 <script>
 (function () {
   var canvasId = "{{ $id }}";
+  var cfgId = "{{ $id }}-cfg";
   var errId = "{{ $id }}-err";
 
   function showErr(msg) {
@@ -17,25 +23,31 @@
     if (el) el.textContent = msg;
   }
 
-  function parseCfg() {
-    var raw = `{{ .Inner | safeHTML }}`.trim();
-// 兼容 Markdown 代码块 ```json ... ```
-raw = raw.replace(/^```[a-zA-Z]*\s*/,'').replace(/```$/,'').trim();
+  function getRawCfgText() {
+    var el = document.getElementById(cfgId);
+    if (!el) return "";
+    // textContent 会把 <pre><code> 等标签剥掉，只留下里面的 JSON 文本
+    return (el.textContent || "").trim();
+  }
 
+  function parseCfg() {
+    var raw = getRawCfgText();
     if (!raw) return null;
 
-    // 1) 优先严格 JSON
+    // 如果你文章里用了 ```json 代码块，这里会包含 ```，我们把它剥掉
+    raw = raw.replace(/^\s*```[a-zA-Z]*\s*/,'').replace(/```\s*$/,'').trim();
+    if (!raw) return null;
+
+    // 1) 严格 JSON
     try { return JSON.parse(raw); } catch (e) {}
 
-    // 2) 兼容 JS 对象字面量（尾逗号等）
-    // 注意：如果你未来想 100% 安全，请尽量把 chart 配置写成标准 JSON
+    // 2) 容错 JS 对象字面量
     try { return (new Function("return (" + raw + ");"))(); } catch (e) {}
 
     return null;
   }
 
-  // 等 canvas、Chart.js 都就绪，并且等一次浏览器绘制（避免尺寸为 0）
-  function readyThenRender() {
+  function renderWhenReady() {
     var start = Date.now();
 
     (function tick() {
@@ -59,12 +71,11 @@ raw = raw.replace(/^```[a-zA-Z]*\s*/,'').replace(/```$/,'').trim();
         return;
       }
 
-      // 等一帧，让布局/尺寸稳定
       requestAnimationFrame(function () {
         var cfg = parseCfg();
         if (!cfg || typeof cfg !== "object") {
-          showErr("Chart 配置不是对象（请检查 chart shortcode 内 JSON/对象是否完整）");
-          console.error("Chart raw config:", `{{ .Inner | safeHTML }}`);
+          showErr("Chart 配置不是对象（请检查 chart shortcode 内 JSON 是否完整）");
+          console.error("Chart raw config text:", getRawCfgText());
           return;
         }
 
@@ -80,13 +91,14 @@ raw = raw.replace(/^```[a-zA-Z]*\s*/,'').replace(/```$/,'').trim();
           console.error(e);
         }
       });
+
     })();
   }
 
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", readyThenRender);
+    document.addEventListener("DOMContentLoaded", renderWhenReady);
   } else {
-    readyThenRender();
+    renderWhenReady();
   }
 })();
 </script>
