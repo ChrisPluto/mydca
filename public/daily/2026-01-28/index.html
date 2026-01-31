@@ -213,7 +213,8 @@
 </ul>
 <h2 id="-我的持仓占比">🎨 我的持仓占比</h2>
 <div style="max-width: 980px; margin: 16px 0;">
-  <canvas id="chart-daily%5C2026-01-28.md-0" style="width:100%; height:420px;"></canvas>
+  
+  <canvas id="chart-daily%5C2026-01-28.md-0" width="980" height="420" style="width:100%; height:420px;"></canvas>
   <div id="chart-daily%5C2026-01-28.md-0-err" style="margin-top:8px; color:#b00020; font-size:14px; white-space:pre-wrap;"></div>
 </div>
 
@@ -235,56 +236,73 @@
     try { return JSON.parse(raw); } catch (e) {}
 
     
+    
     try { return (new Function("return (" + raw + ");"))(); } catch (e) {}
 
     return null;
   }
 
-  function render() {
-    var canvas = document.getElementById(canvasId);
-    if (!canvas) return;
-
-    var cfg = parseCfg();
-    if (!cfg || typeof cfg !== "object") {
-      showErr("Chart 配置不是对象（请检查 chart shortcode 内 JSON/对象是否完整）");
-      console.error("Chart raw config:", `\u007b\u0022type\u0022:\u0022doughnut\u0022,\u0022data\u0022:\u007b\u0022labels\u0022:[\u0022btc\u0022,\u0022eth\u0022,\u0022sol\u0022],\u0022datasets\u0022:[\u007b\u0022data\u0022:[2500,500,2700],\u0022backgroundColor\u0022:[\u0022#49F0D0\u0022,\u0022#699986\u0022,\u0022#1CD5A4\u0022]\u007d]\u007d,\u0022options\u0022:\u007b\u0022plugins\u0022:\u007b\u0022title\u0022:\u007b\u0022display\u0022:true,\u0022text\u0022:\u0022小李飞刀的持仓环形分布图(单位：usdt)\u0022\u007d,\u0022legend\u0022:\u007b\u0022display\u0022:true,\u0022position\u0022:\u0022right\u0022\u007d\u007d,\u0022maintainAspectRatio\u0022:false\u007d\u007d`);
-      return;
-    }
-
-    window.__hugoCharts = window.__hugoCharts || {};
-    if (window.__hugoCharts[canvasId]) {
-      try { window.__hugoCharts[canvasId].destroy(); } catch(e) {}
-    }
-    window.__hugoCharts[canvasId] = new Chart(canvas.getContext("2d"), cfg);
-  }
-
   
-  function waitForChartAndRender() {
+  function readyThenRender() {
     var start = Date.now();
+
     (function tick() {
-      if (window.Chart) {
-        render();
+      var canvas = document.getElementById(canvasId);
+
+      if (!canvas) {
+        if (Date.now() - start > 3000) {
+          showErr("未找到 canvas（页面未正确渲染 chart shortcode）");
+          return;
+        }
+        setTimeout(tick, 50);
         return;
       }
-      if (Date.now() - start > 3000) {
-        showErr("Chart.js 加载超时（请检查 js/chart.umd.min.js 是否存在且可访问）");
+
+      if (!window.Chart) {
+        if (Date.now() - start > 5000) {
+          showErr("Chart.js 加载超时（请检查 js/chart.umd.min.js 是否存在且可访问）");
+          return;
+        }
+        setTimeout(tick, 50);
         return;
       }
-      setTimeout(tick, 50);
+
+      
+      requestAnimationFrame(function () {
+        var cfg = parseCfg();
+        if (!cfg || typeof cfg !== "object") {
+          showErr("Chart 配置不是对象（请检查 chart shortcode 内 JSON/对象是否完整）");
+          console.error("Chart raw config:", `\u007b\u0022type\u0022:\u0022doughnut\u0022,\u0022data\u0022:\u007b\u0022labels\u0022:[\u0022btc\u0022,\u0022eth\u0022,\u0022sol\u0022],\u0022datasets\u0022:[\u007b\u0022data\u0022:[2500,500,2700],\u0022backgroundColor\u0022:[\u0022#49F0D0\u0022,\u0022#699986\u0022,\u0022#1CD5A4\u0022]\u007d]\u007d,\u0022options\u0022:\u007b\u0022plugins\u0022:\u007b\u0022title\u0022:\u007b\u0022display\u0022:true,\u0022text\u0022:\u0022小李飞刀的持仓环形分布图(单位：usdt)\u0022\u007d,\u0022legend\u0022:\u007b\u0022display\u0022:true,\u0022position\u0022:\u0022right\u0022\u007d\u007d,\u0022maintainAspectRatio\u0022:false\u007d\u007d`);
+          return;
+        }
+
+        window.__hugoCharts = window.__hugoCharts || {};
+        if (window.__hugoCharts[canvasId]) {
+          try { window.__hugoCharts[canvasId].destroy(); } catch(e) {}
+        }
+
+        try {
+          window.__hugoCharts[canvasId] = new Chart(canvas.getContext("2d"), cfg);
+        } catch (e) {
+          showErr("Chart 初始化失败：" + e);
+          console.error(e);
+        }
+      });
     })();
   }
 
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", waitForChartAndRender);
+    document.addEventListener("DOMContentLoaded", readyThenRender);
   } else {
-    waitForChartAndRender();
+    readyThenRender();
   }
 })();
 </script>
 
 <h2 id="-我的定投收益分布">🍺 我的定投收益分布</h2>
 <div style="max-width: 980px; margin: 16px 0;">
-  <canvas id="chart-daily%5C2026-01-28.md-1" style="width:100%; height:420px;"></canvas>
+  
+  <canvas id="chart-daily%5C2026-01-28.md-1" width="980" height="420" style="width:100%; height:420px;"></canvas>
   <div id="chart-daily%5C2026-01-28.md-1-err" style="margin-top:8px; color:#b00020; font-size:14px; white-space:pre-wrap;"></div>
 </div>
 
@@ -306,49 +324,65 @@
     try { return JSON.parse(raw); } catch (e) {}
 
     
+    
     try { return (new Function("return (" + raw + ");"))(); } catch (e) {}
 
     return null;
   }
 
-  function render() {
-    var canvas = document.getElementById(canvasId);
-    if (!canvas) return;
-
-    var cfg = parseCfg();
-    if (!cfg || typeof cfg !== "object") {
-      showErr("Chart 配置不是对象（请检查 chart shortcode 内 JSON/对象是否完整）");
-      console.error("Chart raw config:", `\u007b\u0022type\u0022:\u0022bar\u0022,\u0022data\u0022:\u007b\u0022labels\u0022:[\u0022btc\u0022,\u0022eth\u0022,\u0022sol\u0022],\u0022datasets\u0022:[\u007b\u0022data\u0022:[48.351377,57.2101093,-236.53359531],\u0022backgroundColor\u0022:[\u0022#49F0D0\u0022,\u0022#699986\u0022,\u0022#1CD5A4\u0022]\u007d]\u007d,\u0022options\u0022:\u007b\u0022plugins\u0022:\u007b\u0022title\u0022:\u007b\u0022display\u0022:true,\u0022text\u0022:\u0022小李飞刀的持仓收益柱状图(单位：usdt)\u0022\u007d,\u0022legend\u0022:\u007b\u0022display\u0022:false,\u0022position\u0022:\u0022right\u0022\u007d\u007d,\u0022maintainAspectRatio\u0022:false\u007d\u007d`);
-      return;
-    }
-
-    window.__hugoCharts = window.__hugoCharts || {};
-    if (window.__hugoCharts[canvasId]) {
-      try { window.__hugoCharts[canvasId].destroy(); } catch(e) {}
-    }
-    window.__hugoCharts[canvasId] = new Chart(canvas.getContext("2d"), cfg);
-  }
-
   
-  function waitForChartAndRender() {
+  function readyThenRender() {
     var start = Date.now();
+
     (function tick() {
-      if (window.Chart) {
-        render();
+      var canvas = document.getElementById(canvasId);
+
+      if (!canvas) {
+        if (Date.now() - start > 3000) {
+          showErr("未找到 canvas（页面未正确渲染 chart shortcode）");
+          return;
+        }
+        setTimeout(tick, 50);
         return;
       }
-      if (Date.now() - start > 3000) {
-        showErr("Chart.js 加载超时（请检查 js/chart.umd.min.js 是否存在且可访问）");
+
+      if (!window.Chart) {
+        if (Date.now() - start > 5000) {
+          showErr("Chart.js 加载超时（请检查 js/chart.umd.min.js 是否存在且可访问）");
+          return;
+        }
+        setTimeout(tick, 50);
         return;
       }
-      setTimeout(tick, 50);
+
+      
+      requestAnimationFrame(function () {
+        var cfg = parseCfg();
+        if (!cfg || typeof cfg !== "object") {
+          showErr("Chart 配置不是对象（请检查 chart shortcode 内 JSON/对象是否完整）");
+          console.error("Chart raw config:", `\u007b\u0022type\u0022:\u0022bar\u0022,\u0022data\u0022:\u007b\u0022labels\u0022:[\u0022btc\u0022,\u0022eth\u0022,\u0022sol\u0022],\u0022datasets\u0022:[\u007b\u0022data\u0022:[48.351377,57.2101093,-236.53359531],\u0022backgroundColor\u0022:[\u0022#49F0D0\u0022,\u0022#699986\u0022,\u0022#1CD5A4\u0022]\u007d]\u007d,\u0022options\u0022:\u007b\u0022plugins\u0022:\u007b\u0022title\u0022:\u007b\u0022display\u0022:true,\u0022text\u0022:\u0022小李飞刀的持仓收益柱状图(单位：usdt)\u0022\u007d,\u0022legend\u0022:\u007b\u0022display\u0022:false,\u0022position\u0022:\u0022right\u0022\u007d\u007d,\u0022maintainAspectRatio\u0022:false\u007d\u007d`);
+          return;
+        }
+
+        window.__hugoCharts = window.__hugoCharts || {};
+        if (window.__hugoCharts[canvasId]) {
+          try { window.__hugoCharts[canvasId].destroy(); } catch(e) {}
+        }
+
+        try {
+          window.__hugoCharts[canvasId] = new Chart(canvas.getContext("2d"), cfg);
+        } catch (e) {
+          showErr("Chart 初始化失败：" + e);
+          console.error(e);
+        }
+      });
     })();
   }
 
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", waitForChartAndRender);
+    document.addEventListener("DOMContentLoaded", readyThenRender);
   } else {
-    waitForChartAndRender();
+    readyThenRender();
   }
 })();
 </script>

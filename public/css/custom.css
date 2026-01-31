@@ -184,8 +184,8 @@ a:hover{ text-decoration:underline; }
   white-space: pre-wrap;
 }
 
-/* =========================
 
+/* =========================
    小屏幕适配
    ========================= */
 @media (max-width: 900px){
@@ -199,6 +199,7 @@ a:hover{ text-decoration:underline; }
 
   .article h1{ font-size: 24px; }
 }
+<<<<<<< HEAD
 
 /* =========================
    Header 右侧社交图标（必须加）
@@ -232,3 +233,5 @@ a:hover{ text-decoration:underline; }
 }
 
 
+=======
+>>>>>>> 3840e7b (daily update 2026/01/31 周六 16:04:38.38)
