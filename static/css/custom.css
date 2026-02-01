@@ -214,3 +214,20 @@ a:hover{ text-decoration:underline; }
   height: 28px;
   display: block;
 }
+
+
+
+
+details > summary{
+  cursor: pointer;
+  user-select: none;
+}
+
+.jump-link a{
+  font-size: 12px;
+  color: #666;
+  text-decoration: none;
+}
+.jump-link a:hover{
+  text-decoration: underline;
+}
